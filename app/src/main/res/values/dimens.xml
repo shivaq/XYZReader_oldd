@@ -19,8 +19,8 @@
 
     <dimen name="key_line_1">8dp</dimen>
     <dimen name="key_line_2">16dp</dimen>
-
-
+    <dimen name="indicator_start">160px</dimen>
+    <dimen name="indicator_end">260px</dimen>
 
 
 </resources>

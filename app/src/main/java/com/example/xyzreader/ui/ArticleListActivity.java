@@ -23,6 +23,9 @@ import com.example.xyzreader.data.ArticleLoader;
 import com.example.xyzreader.data.ItemsContract;
 import com.example.xyzreader.data.UpdaterService;
 
+import butterknife.BindColor;
+import butterknife.ButterKnife;
+
 /**
  * An activity representing a list of Articles. This activity has different presentations for
  * handset and tablet-size devices. On handsets, the activity presents a list of items, which when
@@ -36,16 +39,30 @@ public class ArticleListActivity extends ActionBarActivity implements
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private RecyclerView mRecyclerView;
 
+    @BindColor(R.color.colorPrimary)
+    int colorPrimary;
+    @BindColor(R.color.colorAccent)
+    int colorAccent;
+    @BindColor(R.color.colorPrimaryLight)
+    int colorPrimaryLight;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_article_list);
+        ButterKnife.bind(this);
 
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
 
         final View toolbarContainerView = findViewById(R.id.toolbar_container);
 
         mSwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipe_refresh_layout);
+
+        int start = getResources().getDimensionPixelSize(R.dimen.indicator_start);
+        int end = getResources().getDimensionPixelSize(R.dimen.indicator_end);
+        mSwipeRefreshLayout.setProgressViewOffset(true, start, end);
+
+        mSwipeRefreshLayout.setColorSchemeColors(colorPrimary, colorPrimaryLight, colorAccent);
 
         mRecyclerView = (RecyclerView) findViewById(R.id.recycler_view);
         getLoaderManager().initLoader(0, null, this);
