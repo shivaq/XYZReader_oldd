@@ -1,12 +1,3 @@
-<!--<com.example.xyzreader.ui.DrawInsetsFrameLayout-->
-    <!--xmlns:android="http://schemas.android.com/apk/res/android"-->
-    <!--xmlns:app="http://schemas.android.com/apk/res-auto"-->
-    <!--xmlns:tools="http://schemas.android.com/tools"-->
-    <!--android:id="@+id/draw_insets_frame_layout"-->
-    <!--android:layout_width="match_parent"-->
-    <!--android:layout_height="match_parent"-->
-    <!--app:layout_behavior="@string/appbar_scrolling_view_behavior">-->
-
     <android.support.v4.widget.NestedScrollView
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -65,7 +56,6 @@
                     tools:text="You cannot say 'no' to the people you love, not often. That's the secret. And then when you do, it has to sound like a 'yes'. Or you have to make them say 'no.' You have to take time and trouble."/>
 
             </com.example.xyzreader.ui.MaxWidthLinearLayout>
-            <!--TODO: invoke retated actions-->
             <android.support.design.widget.FloatingActionButton
                 android:id="@+id/share_fab"
                 android:layout_width="wrap_content"
@@ -79,18 +69,3 @@
                 app:fabSize="normal"/>
         </FrameLayout>
     </android.support.v4.widget.NestedScrollView>
-
-    <!--&lt;!&ndash;TODO: invoke retated actions&ndash;&gt;-->
-    <!--<android.support.design.widget.FloatingActionButton-->
-        <!--android:id="@+id/share_fab"-->
-        <!--android:layout_width="wrap_content"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:layout_gravity="bottom|end"-->
-        <!--android:layout_marginBottom="@dimen/fab_margin"-->
-        <!--android:layout_marginRight="@dimen/fab_margin"-->
-        <!--android:contentDescription="@string/action_share"-->
-        <!--android:elevation="@dimen/elevation_fab"-->
-        <!--android:src="@drawable/ic_share"-->
-        <!--app:fabSize="normal"/>-->
-
-<!--</com.example.xyzreader.ui.DrawInsetsFrameLayout>-->
