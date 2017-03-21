@@ -35,6 +35,7 @@
                     <TextView
                         android:id="@+id/article_title"
                         style="@style/article_title"
+                        android:transitionName="@string/article_title_transition_name"
                         tools:text="Miss Anders! I didn’t recognize you with your clothes on."/>
 
                     <TextView

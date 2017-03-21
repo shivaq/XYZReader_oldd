@@ -1,5 +1,6 @@
 package com.example.xyzreader.ui;
 
+import android.app.Activity;
 import android.app.LoaderManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -8,14 +9,20 @@ import android.content.IntentFilter;
 import android.content.Loader;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.ActivityOptionsCompat;
+import android.support.v4.util.Pair;
+import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.support.v7.widget.Toolbar;
 import android.text.format.DateUtils;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.TextView;
 
 import com.example.xyzreader.R;
@@ -25,6 +32,7 @@ import com.example.xyzreader.data.UpdaterService;
 
 import butterknife.BindColor;
 import butterknife.ButterKnife;
+import timber.log.Timber;
 
 /**
  * An activity representing a list of Articles. This activity has different presentations for
@@ -32,12 +40,15 @@ import butterknife.ButterKnife;
  * touched, lead to a {@link ArticleDetailActivity} representing item details. On tablets, the
  * activity presents a grid of items as cards.
  */
-public class ArticleListActivity extends ActionBarActivity implements
+public class ArticleListActivity extends AppCompatActivity implements
         LoaderManager.LoaderCallbacks<Cursor> {
 
+    private static final String TAG = ArticleListActivity.class.getSimpleName();
+    
     private Toolbar mToolbar;
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private RecyclerView mRecyclerView;
+    private boolean mHoldForTransition;
 
     @BindColor(R.color.colorPrimary)
     int colorPrimary;
@@ -65,12 +76,21 @@ public class ArticleListActivity extends ActionBarActivity implements
         mSwipeRefreshLayout.setColorSchemeColors(colorPrimary, colorPrimaryLight, colorAccent);
 
         mRecyclerView = (RecyclerView) findViewById(R.id.recycler_view);
+
+        mHoldForTransition = getResources().getBoolean(R.bool.do_shared_transition);
+
+        // Postpone transition before initLoader
+        if(mHoldForTransition){
+            Timber.d("ArticleListActivity:onCreate: supportPostponeEnterTransition");
+            supportPostponeEnterTransition();
+        }
         getLoaderManager().initLoader(0, null, this);
 
         if (savedInstanceState == null) {
             refresh();
         }
     }
+
 
     private void refresh() {
         startService(new Intent(this, UpdaterService.class));
@@ -110,14 +130,32 @@ public class ArticleListActivity extends ActionBarActivity implements
         return ArticleLoader.newAllArticlesInstance(this);
     }
 
+
     @Override
     public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
-        Adapter adapter = new Adapter(cursor);
+        final Adapter adapter = new Adapter(cursor);
+        if (cursor.getCount() == 0) {
+            supportStartPostponedEnterTransition();
+        } else {
+            mRecyclerView.getViewTreeObserver().addOnPreDrawListener(
+                    new ViewTreeObserver.OnPreDrawListener() {
+                        @Override
+                        public boolean onPreDraw() {
+                            if(mRecyclerView.getChildCount() > 0){
+                                mRecyclerView.getViewTreeObserver().removeOnPreDrawListener(this);
+                                if(mHoldForTransition){
+                                    Log.d(TAG, "onPreDraw: supportStartPostponedEnterTransition");
+                                    supportStartPostponedEnterTransition();
+                                }
+                                return true;
+                            }
+                            return false;
+                        }
+                    }
+            );
+        }
         adapter.setHasStableIds(true);
         mRecyclerView.setAdapter(adapter);
-
-
-//        LinearLayoutManager sglm = new LinearLayoutManager(this);
         int columnCount = getResources().getInteger(R.integer.list_column_count);
         StaggeredGridLayoutManager sglm =
                 new StaggeredGridLayoutManager(columnCount, StaggeredGridLayoutManager.VERTICAL);
@@ -129,8 +167,11 @@ public class ArticleListActivity extends ActionBarActivity implements
         mRecyclerView.setAdapter(null);
     }
 
+
+    /****************** View Holder ***********************/
     private class Adapter extends RecyclerView.Adapter<ViewHolder> {
         private Cursor mCursor;
+        private Context mContext;
 
         public Adapter(Cursor cursor) {
             mCursor = cursor;
@@ -146,11 +187,25 @@ public class ArticleListActivity extends ActionBarActivity implements
         public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             View view = getLayoutInflater().inflate(R.layout.list_item_article, parent, false);
             final ViewHolder vh = new ViewHolder(view);
+
+            mContext = view.getContext();
+
+            final ActivityOptionsCompat optionsCompat =
+                    ActivityOptionsCompat.makeSceneTransitionAnimation((Activity) mContext,
+                            new Pair<View, String>(vh.thumbnailView,
+                                    getString(R.string.thumbnail_transition_name)),
+                            new Pair<View, String>(vh.titleView,
+                                    getString(R.string.article_title_transition_name)));
+
             view.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    startActivity(new Intent(Intent.ACTION_VIEW,
-                            ItemsContract.Items.buildItemUri(getItemId(vh.getAdapterPosition()))));
+                    Timber.d("Adapter:onClick: ");
+                    ActivityCompat.startActivity(mContext,
+                            new Intent(Intent.ACTION_VIEW,
+                            ItemsContract.Items.buildItemUri(
+                                    getItemId(vh.getAdapterPosition()))),
+                            optionsCompat.toBundle());
                 }
             });
             return vh;
@@ -175,6 +230,8 @@ public class ArticleListActivity extends ActionBarActivity implements
                     ImageLoaderHelper.getInstance(ArticleListActivity.this).getImageLoader());
 
             holder.thumbnailView.setAspectRatio(mCursor.getFloat(ArticleLoader.Query.ASPECT_RATIO));
+            ViewCompat.setTransitionName(holder.thumbnailView, "thumbnailView" + position);
+            ViewCompat.setTransitionName(holder.titleView, "titleView" + position);
         }
 
         @Override

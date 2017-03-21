@@ -16,6 +16,9 @@
 -->
 
 <resources>
+    <style name="AppTheme" parent="@style/Theme.AppCompat.Light.NoActionBar">
+        <item name="android:windowContentTransitions">true</item>
+    </style>
 
     <style name="AppTheme.Detail">
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>

@@ -54,6 +54,8 @@ public class ArticleDetailFragment extends Fragment implements
     private boolean mIsCard = false;
     private int mStatusBarFullOpacityBottom;
 
+    private boolean mTransitionAnimation;
+
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
@@ -102,6 +104,7 @@ public class ArticleDetailFragment extends Fragment implements
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
+        mTransitionAnimation = getResources().getBoolean(R.bool.do_shared_transition);
         mRootView = inflater.inflate(R.layout.fragment_article_detail_collapsing, container, false);
 
         mPhotoView = (ImageView) mRootView.findViewById(R.id.photo);
@@ -225,6 +228,9 @@ public class ArticleDetailFragment extends Fragment implements
             return;
         }
 
+        if(mTransitionAnimation){
+            getActivityCast().supportStartPostponedEnterTransition();
+        }
         mCursor = cursor;
         if (mCursor != null && !mCursor.moveToFirst()) {
             Log.e(TAG, "Error reading item detail cursor");

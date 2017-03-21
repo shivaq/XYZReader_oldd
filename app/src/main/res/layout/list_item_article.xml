@@ -26,6 +26,7 @@
                 android:id="@+id/thumbnail"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:transitionName="@string/thumbnail_transition_name"
                 android:background="@color/photo_placeholder"/>
 
             <View
@@ -36,6 +37,7 @@
             <!--TODO:タイトルも遷移アニメーションさせる-->
             <TextView
                 android:id="@+id/article_title"
+                android:transitionName="@string/article_title_transition_name"
                 style="@style/article_title"
                 tools:text="Miss Anders! I didn’t recognize you with your clothes on."/>
         </FrameLayout>
